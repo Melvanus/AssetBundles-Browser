@@ -1,6 +1,6 @@
 
 {
-	"name": "com.unity.assetbundlebrowser",
+	"name": "de.vreedback.assetbundlebrowser",
 	"displayName": "Asset Bundle Browser",
 	"version": "1.7.0",
 	"unity": "2018.1",
