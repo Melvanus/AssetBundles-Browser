@@ -11,29 +11,30 @@ namespace AssetBundleBrowser
 
         internal SingleBundleInspector() { }
 
-        private Editor m_Editor = null;
+        private Editor m_inspectEditor = null;
 
         private Rect m_Position;
 
         [SerializeField]
         private Vector2 m_ScrollPosition;
 
-        private AssetBundleInspectTab m_assetBundleInspectTab = null;
-        private AssetBundleInspectTab.InspectTabData m_inspectTabData = null;
+        private AssetBundleTab m_assetBundleTab = null;
+        private TabData m_inspectTabData = null;
 
-        internal void SetBundle(AssetBundle bundle, string path = "", AssetBundleInspectTab.InspectTabData inspectTabData = null, AssetBundleInspectTab assetBundleInspectTab = null)
+        internal void SetBundle(AssetBundle bundle, string path = "", TabData inspectTabData = null, AssetBundleTab assetBundleTab = null)
         {
             //static var...
             currentPath = path;
             m_inspectTabData = inspectTabData;
-            m_assetBundleInspectTab = assetBundleInspectTab;
+            m_assetBundleTab = assetBundleTab;
 
             //members
-            m_Editor = null;
-            if(bundle != null)
+            m_inspectEditor = null;
+            if (bundle != null)
             {
-                m_Editor = Editor.CreateEditor(bundle);
+                m_inspectEditor = Editor.CreateEditor(bundle);
             }
+            
         }
 
         internal void OnGUI(Rect pos)
@@ -45,11 +46,11 @@ namespace AssetBundleBrowser
 
         private void DrawBundleData()
         {
-            if (m_Editor != null)
+            if (m_inspectEditor != null)
             {
                 GUILayout.BeginArea(m_Position);
                 m_ScrollPosition = EditorGUILayout.BeginScrollView(m_ScrollPosition);
-                m_Editor.OnInspectorGUI();
+                m_inspectEditor.OnInspectorGUI();
                 EditorGUILayout.EndScrollView();
                 GUILayout.EndArea();
             }
@@ -68,8 +69,8 @@ namespace AssetBundleBrowser
                         if (!possibleFolderData.ignoredFiles.Contains(currentPath))
                             possibleFolderData.ignoredFiles.Add(currentPath);
 
-                        if(m_assetBundleInspectTab != null)
-                            m_assetBundleInspectTab.RefreshBundles();
+                        if(m_assetBundleTab != null)
+                            m_assetBundleTab.RefreshBundles();
                     }
                 } 
             }
@@ -81,6 +82,8 @@ namespace AssetBundleBrowser
     {
         internal bool pathFoldout = false;
         internal bool advancedFoldout = false;
+        
+        
         public override void OnInspectorGUI()
         {
             AssetBundle bundle = target as AssetBundle;
@@ -125,5 +128,6 @@ namespace AssetBundleBrowser
                 EditorGUI.indentLevel--;
             }
         }
+
     }
 }

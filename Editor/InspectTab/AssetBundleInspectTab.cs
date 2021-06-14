@@ -9,15 +9,13 @@ using System.Linq;
 namespace AssetBundleBrowser
 {
     [System.Serializable]
-    internal class AssetBundleInspectTab
+    internal class AssetBundleInspectTab : AssetBundleTab
     {
         Rect m_Position;
 
         [SerializeField]
         private InspectTabData m_Data;
-        
 
-        private Dictionary<string, List<string> > m_BundleList;
         private InspectBundleTree m_BundleTreeView;
         [SerializeField]
         private TreeViewState m_BundleTreeState;
@@ -151,12 +149,12 @@ namespace AssetBundleBrowser
             }
         }
 
-        internal void RemoveBundlePath(string pathToRemove)
+        internal override void RemoveBundlePath(string pathToRemove)
         {
             UnloadBundle(pathToRemove);
             m_Data.RemovePath(pathToRemove);
         }
-        internal void RemoveBundleFolder(string pathToRemove)
+        internal override void RemoveBundleFolder(string pathToRemove)
         {
             List<string> paths = null;
             if(m_BundleList.TryGetValue(pathToRemove, out paths))
@@ -223,7 +221,7 @@ namespace AssetBundleBrowser
             }
         }
 
-        internal void RefreshBundles()
+        internal override void RefreshBundles()
         {
             ClearData();
 
@@ -309,11 +307,7 @@ namespace AssetBundleBrowser
             }
         }
 
-        internal Dictionary<string, List<string>> BundleList
-        { get { return m_BundleList; } }
-
-
-        internal void SetBundleItem(IList<InspectTreeItem> selected)
+        internal override void SetBundleItem(IList<InspectTreeItem> selected)
         {
             //m_SelectedBundleTreeItems = selected;
             if (selected == null || selected.Count == 0 || selected[0] == null)
@@ -337,106 +331,6 @@ namespace AssetBundleBrowser
                 //    inspectorRect,
                 //    new GUIContent("Multi-select inspection not supported"),
                 //    style);
-            }
-        }
-
-        [System.Serializable]
-        internal class InspectTabData
-        {
-            [SerializeField]
-            private List<string> m_BundlePaths = new List<string>();
-            [SerializeField]
-            private List<BundleFolderData> m_BundleFolders = new List<BundleFolderData>();
-
-            internal IList<string> BundlePaths { get { return m_BundlePaths.AsReadOnly(); } }
-            internal IList<BundleFolderData> BundleFolders { get { return m_BundleFolders.AsReadOnly(); } }
-
-            internal void AddPath(string newPath)
-            {
-                if (!m_BundlePaths.Contains(newPath))
-                {
-                    var possibleFolderData = FolderDataContainingFilePath(newPath);
-                    if(possibleFolderData == null)
-                    {
-                        m_BundlePaths.Add(newPath);
-                    }
-                    else
-                    {
-                        possibleFolderData.ignoredFiles.Remove(newPath);
-                    }
-                }
-            }
-
-            internal void AddFolder(string newPath)
-            {
-                if (!BundleFolderContains(newPath))
-                    m_BundleFolders.Add(new BundleFolderData(newPath));
-            }
-
-            internal void RemovePath(string pathToRemove)
-            {
-                m_BundlePaths.Remove(pathToRemove);
-            }
-
-            internal void RemoveFolder(string pathToRemove)
-            {
-                m_BundleFolders.Remove(BundleFolders.FirstOrDefault(bfd => bfd.path == pathToRemove));
-            }
-
-            internal bool FolderIgnoresFile(string folderPath, string filePath)
-            {
-                if (BundleFolders == null)
-                    return false;
-                var bundleFolderData = BundleFolders.FirstOrDefault(bfd => bfd.path == folderPath);
-                return bundleFolderData != null && bundleFolderData.ignoredFiles.Contains(filePath);
-            }
-
-            internal BundleFolderData FolderDataContainingFilePath(string filePath)
-            {
-                foreach (var bundleFolderData in BundleFolders)
-                {
-                    if (Path.GetFullPath(filePath).StartsWith(Path.GetFullPath(bundleFolderData.path)))
-                    {
-                        return bundleFolderData;
-                    }
-                }
-                return null;
-            }
-
-            private bool BundleFolderContains(string folderPath)
-            {
-                foreach(var bundleFolderData in BundleFolders)
-                {
-                    if(Path.GetFullPath(bundleFolderData.path) == Path.GetFullPath(folderPath))
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            [System.Serializable]
-            internal class BundleFolderData
-            {
-                [SerializeField]
-                internal string path;
-
-                [SerializeField]
-                private List<string> m_ignoredFiles;
-                internal List<string> ignoredFiles
-                {
-                    get
-                    {
-                        if (m_ignoredFiles == null)
-                            m_ignoredFiles = new List<string>();
-                        return m_ignoredFiles;
-                    }
-                }
-
-                internal BundleFolderData(string p)
-                {
-                    path = p;
-                }
             }
         }
 
