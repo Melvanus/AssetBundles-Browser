@@ -49,7 +49,7 @@ namespace AssetBundleBrowser
         const float k_ToolbarPadding = 15;
         const float k_MenubarPadding = 32;
 
-        [MenuItem("Window/AssetBundle Browser", priority = 2050)]
+        [MenuItem("VReedback/AssetBundle Browser", priority = 2050)]
         static void ShowWindow()
         {
             s_instance = null;
@@ -81,7 +81,11 @@ namespace AssetBundleBrowser
                 m_BuildTab = new AssetBundleBuildTab();
             m_BuildTab.OnEnable(this);
             if (m_InspectTab == null)
+            {
                 m_InspectTab = new AssetBundleInspectTab();
+                m_InspectTab.m_Parent = this;
+            }
+                
             m_InspectTab.OnEnable(subPos);
 
             m_RefreshTexture = EditorGUIUtility.FindTexture("Refresh");
