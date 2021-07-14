@@ -3,7 +3,6 @@ using UnityEngine;
 using System.IO;
 using System.Threading.Tasks;
 using System;
-using VReedback.Utils;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace AssetBundleBrowser
