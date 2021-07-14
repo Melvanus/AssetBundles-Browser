@@ -22,11 +22,7 @@ namespace AssetBundleBrowser
 
         internal Editor m_Editor = null;
 
-        internal EditorWindow m_Parent = null;
-
         private SingleBundleInspector m_SingleInspector;
-
-        private UploadBundleGUI m_uploadBundleGUI;
 
         /// <summary>
         /// Collection of loaded asset bundle records indexed by bundle name
@@ -57,7 +53,6 @@ namespace AssetBundleBrowser
         {
             m_BundleList = new Dictionary<string, List<string>>();
             m_SingleInspector = new SingleBundleInspector();
-            m_uploadBundleGUI = new UploadBundleGUI(this);
             m_loadedAssetBundles = new Dictionary<string, AssetBundleRecord>();
         }
 
@@ -82,8 +77,6 @@ namespace AssetBundleBrowser
                 file.Close();
             }
 
-            if (m_uploadBundleGUI != null)
-                m_uploadBundleGUI.OnEnable(new Rect(m_Position.x, m_Position.y, m_Position.width, 90));
 
             if (m_BundleList == null)
                 m_BundleList = new Dictionary<string, List<string>>();
@@ -109,9 +102,6 @@ namespace AssetBundleBrowser
 
             bf.Serialize(file, m_Data);
             file.Close();
-
-            if (m_uploadBundleGUI != null)
-                m_uploadBundleGUI.OnDisable();
         }
 
         internal void OnGUI(Rect pos)
@@ -137,11 +127,6 @@ namespace AssetBundleBrowser
         private void OnGUIEditor()
         {
             EditorGUILayout.Space();
-
-            m_uploadBundleGUI.OnGUI(new Rect(m_Position.x, m_Position.y, m_Position.width, 90));
-
-            EditorGUILayout.Space(90);
-
             GUILayout.BeginHorizontal();
 
             if (GUILayout.Button("Add File", GUILayout.MaxWidth(75f)))
@@ -159,8 +144,8 @@ namespace AssetBundleBrowser
             if (m_BundleList.Count > 0)
             {
                 int halfWidth = (int)(m_Position.width / 2.0f);
-                m_BundleTreeView.OnGUI(new Rect(m_Position.x, m_Position.y + 120, halfWidth, m_Position.height - 30));
-                m_SingleInspector.OnGUI(new Rect(m_Position.x + halfWidth, m_Position.y + 120, halfWidth, m_Position.height - 30));
+                m_BundleTreeView.OnGUI(new Rect(m_Position.x, m_Position.y + 30, halfWidth, m_Position.height - 30));
+                m_SingleInspector.OnGUI(new Rect(m_Position.x + halfWidth, m_Position.y + 30, halfWidth, m_Position.height - 30));
             }
         }
 
@@ -223,7 +208,6 @@ namespace AssetBundleBrowser
         private void ClearData()
         {
             m_SingleInspector.SetBundle(null);
-            m_uploadBundleGUI.SetBundle(null);
 
             if (null != m_loadedAssetBundles)
             {
@@ -329,18 +313,15 @@ namespace AssetBundleBrowser
             if (selected == null || selected.Count == 0 || selected[0] == null)
             {
                 m_SingleInspector.SetBundle(null);
-                m_uploadBundleGUI.SetBundle(null);
             }
             else if(selected.Count == 1)
             {
                 AssetBundle bundle = LoadBundle(selected[0].bundlePath);
                 m_SingleInspector.SetBundle(bundle, selected[0].bundlePath, m_Data, this);
-                m_uploadBundleGUI.SetBundle(bundle, selected[0].bundlePath, m_Data, this);
             }
             else
             {
                 m_SingleInspector.SetBundle(null);
-                m_uploadBundleGUI.SetBundle(null);
 
                 //perhaps there should be a way to set a message in the inspector, to tell it...
                 //var style = GUI.skin.label;
@@ -350,112 +331,6 @@ namespace AssetBundleBrowser
                 //    inspectorRect,
                 //    new GUIContent("Multi-select inspection not supported"),
                 //    style);
-            }
-        }
-
-        public void Repaint()
-        {
-            if (m_Parent != null)
-                m_Parent.Repaint();
-        }
-
-        [System.Serializable]
-        internal class InspectTabData
-        {
-            [SerializeField]
-            private List<string> m_BundlePaths = new List<string>();
-            [SerializeField]
-            private List<BundleFolderData> m_BundleFolders = new List<BundleFolderData>();
-
-            internal IList<string> BundlePaths { get { return m_BundlePaths.AsReadOnly(); } }
-            internal IList<BundleFolderData> BundleFolders { get { return m_BundleFolders.AsReadOnly(); } }
-
-            internal void AddPath(string newPath)
-            {
-                if (!m_BundlePaths.Contains(newPath))
-                {
-                    var possibleFolderData = FolderDataContainingFilePath(newPath);
-                    if(possibleFolderData == null)
-                    {
-                        m_BundlePaths.Add(newPath);
-                    }
-                    else
-                    {
-                        possibleFolderData.ignoredFiles.Remove(newPath);
-                    }
-                }
-            }
-
-            internal void AddFolder(string newPath)
-            {
-                if (!BundleFolderContains(newPath))
-                    m_BundleFolders.Add(new BundleFolderData(newPath));
-            }
-
-            internal void RemovePath(string pathToRemove)
-            {
-                m_BundlePaths.Remove(pathToRemove);
-            }
-
-            internal void RemoveFolder(string pathToRemove)
-            {
-                m_BundleFolders.Remove(BundleFolders.FirstOrDefault(bfd => bfd.path == pathToRemove));
-            }
-
-            internal bool FolderIgnoresFile(string folderPath, string filePath)
-            {
-                if (BundleFolders == null)
-                    return false;
-                var bundleFolderData = BundleFolders.FirstOrDefault(bfd => bfd.path == folderPath);
-                return bundleFolderData != null && bundleFolderData.ignoredFiles.Contains(filePath);
-            }
-
-            internal BundleFolderData FolderDataContainingFilePath(string filePath)
-            {
-                foreach (var bundleFolderData in BundleFolders)
-                {
-                    if (Path.GetFullPath(filePath).StartsWith(Path.GetFullPath(bundleFolderData.path)))
-                    {
-                        return bundleFolderData;
-                    }
-                }
-                return null;
-            }
-
-            private bool BundleFolderContains(string folderPath)
-            {
-                foreach(var bundleFolderData in BundleFolders)
-                {
-                    if(Path.GetFullPath(bundleFolderData.path) == Path.GetFullPath(folderPath))
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            [System.Serializable]
-            internal class BundleFolderData
-            {
-                [SerializeField]
-                internal string path;
-
-                [SerializeField]
-                private List<string> m_ignoredFiles;
-                internal List<string> ignoredFiles
-                {
-                    get
-                    {
-                        if (m_ignoredFiles == null)
-                            m_ignoredFiles = new List<string>();
-                        return m_ignoredFiles;
-                    }
-                }
-
-                internal BundleFolderData(string p)
-                {
-                    path = p;
-                }
             }
         }
 
@@ -530,5 +405,4 @@ namespace AssetBundleBrowser
             m_loadedAssetBundles.Remove(bundleName);
         }
     }
-
 }
