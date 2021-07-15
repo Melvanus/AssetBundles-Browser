@@ -25,10 +25,10 @@ namespace AssetBundleBrowser
 
 	class InspectBundleTree : TreeView
 	{
-		AssetBundleTab m_BundleTab;
-		internal InspectBundleTree(TreeViewState s, AssetBundleTab parent) : base(s)
+		AssetBundleInspectTab m_InspectTab;
+		internal InspectBundleTree(TreeViewState s, AssetBundleInspectTab parent) : base(s)
 		{
-			m_BundleTab = parent;
+			m_InspectTab = parent;
 			showBorder = true;
 		}
 
@@ -36,11 +36,11 @@ namespace AssetBundleBrowser
 		{
 			var root = new TreeViewItem(-1, -1);
 			root.children = new List<TreeViewItem>();
-			if (m_BundleTab == null)
+			if (m_InspectTab == null)
 				Debug.Log("Unknown problem in AssetBundle Browser Inspect tab.  Restart Browser and try again, or file ticket on github.");
 			else
 			{
-				foreach (var folder in m_BundleTab.BundleList)
+				foreach (var folder in m_InspectTab.BundleList)
 				{
                     if (System.String.IsNullOrEmpty(folder.Key))
                     {
@@ -98,7 +98,7 @@ namespace AssetBundleBrowser
                     {
                         RemoveItem(args.item);
                     }
-                    m_BundleTab.RefreshBundles();
+                    m_InspectTab.RefreshBundles();
                 }
             }
         }
@@ -106,9 +106,9 @@ namespace AssetBundleBrowser
         {
             var inspectItem = item as InspectTreeItem;
             if (inspectItem != null)
-                m_BundleTab.RemoveBundlePath(inspectItem.bundlePath);
+                m_InspectTab.RemoveBundlePath(inspectItem.bundlePath);
             else
-                m_BundleTab.RemoveBundleFolder(item.displayName);
+                m_InspectTab.RemoveBundleFolder(item.displayName);
         }
         protected override void SelectionChanged(IList<int> selectedIds)
 		{
@@ -119,12 +119,12 @@ namespace AssetBundleBrowser
 
 			if (selectedIds.Count > 0)
 			{
-                m_BundleTab.SetBundleItem(FindRows(selectedIds).Select(tvi => tvi as InspectTreeItem).ToList());
+                m_InspectTab.SetBundleItem(FindRows(selectedIds).Select(tvi => tvi as InspectTreeItem).ToList());
 				//m_InspectTab.SetBundleItem(FindItem(selectedIds[0], rootItem) as InspectTreeItem);
 			}
 			else
             {
-				m_BundleTab.SetBundleItem(null);
+				m_InspectTab.SetBundleItem(null);
             }
 		}
 

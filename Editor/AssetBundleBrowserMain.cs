@@ -28,7 +28,6 @@ namespace AssetBundleBrowser
             Browser,
             Builder,
             Inspect,
-            Upload
         }
         [SerializeField]
         Mode m_Mode;
@@ -44,9 +43,6 @@ namespace AssetBundleBrowser
 
         [SerializeField]
         internal AssetBundleInspectTab m_InspectTab;
-
-        [SerializeField]
-        internal AssetBundleUploadTab m_UploadTab;
 
         private Texture2D m_RefreshTexture;
 
@@ -69,7 +65,6 @@ namespace AssetBundleBrowser
             if(menu != null)
                menu.AddItem(new GUIContent("Custom Sources"), multiDataSource, FlipDataSource);
         }
-
         internal void FlipDataSource()
         {
             multiDataSource = !multiDataSource;
@@ -88,9 +83,6 @@ namespace AssetBundleBrowser
             if (m_InspectTab == null)
                 m_InspectTab = new AssetBundleInspectTab();
             m_InspectTab.OnEnable(subPos);
-            if (m_UploadTab == null)
-                m_UploadTab = new AssetBundleUploadTab();
-            m_UploadTab.OnEnable(subPos, this);
 
             m_RefreshTexture = EditorGUIUtility.FindTexture("Refresh");
 
@@ -120,8 +112,6 @@ namespace AssetBundleBrowser
                 m_BuildTab.OnDisable();
             if (m_InspectTab != null)
                 m_InspectTab.OnDisable();
-            if (m_UploadTab != null)
-                m_UploadTab.OnDisable();
         }
 
         public void OnBeforeSerialize()
@@ -148,8 +138,6 @@ namespace AssetBundleBrowser
                     break;
                 case Mode.Inspect:
                     break;
-                case Mode.Upload:
-                    break;
                 case Mode.Browser:
                 default:
                     m_ManageTab.Update();
@@ -168,9 +156,6 @@ namespace AssetBundleBrowser
                     break;
                 case Mode.Inspect:
                     m_InspectTab.OnGUI(GetSubWindowArea());
-                    break;
-                case Mode.Upload:
-                    m_UploadTab.OnGUI(GetSubWindowArea());
                     break;
                 case Mode.Browser:
                 default:
@@ -199,16 +184,11 @@ namespace AssetBundleBrowser
                     if (clicked)
                         m_InspectTab.RefreshBundles();
                     break;
-                case Mode.Upload:
-                    clicked = GUILayout.Button(m_RefreshTexture);
-                    if (clicked)
-                        m_UploadTab.RefreshBundles();
-                    break;
             }
 
             float toolbarWidth = position.width - k_ToolbarPadding * 4 - m_RefreshTexture.width;
             //string[] labels = new string[2] { "Configure", "Build"};
-            string[] labels = new string[4] { "Configure", "Build", "Inspect", "Upload" };
+            string[] labels = new string[3] { "Configure", "Build", "Inspect" };
             m_Mode = (Mode)GUILayout.Toolbar((int)m_Mode, labels, "LargeButton", GUILayout.Width(toolbarWidth) );
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
